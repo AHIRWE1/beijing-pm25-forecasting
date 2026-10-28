@@ -1,0 +1,8 @@
+| experiment | model | n_features | best_hyperparameters | cv_RMSE | val_MAE | val_RMSE | val_R2 | test_MAE | test_RMSE | test_R2 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Exp0_Persistence_baseline | PM2.5 in 6 h = PM2.5 now | 1 | none |  | 42.77 | 69.89 | 0.4968 | 38.66 | 61.38 | 0.5747 |
+| Exp1_Ridge_all_features | Ridge regression, lag + moving-average features | 32 | {"m__alpha": 100} | 58.41 | 40.25 | 62.04 | 0.6035 | 36.99 | 55.34 | 0.6544 |
+| Exp2_RandomForest_no_lags | Random Forest WITHOUT lag/moving-average features (current weather + calendar only, plus current PM2.5) | 16 | {"n_estimators": 200, "min_samples_leaf": 20, "max_features": 0.6, "max_depth": 12} | 59.75 | 38.41 | 61.62 | 0.6089 | 35.46 | 54.28 | 0.6674 |
+| Exp3_RandomForest_all_features | Random Forest, lag + moving-average features | 32 | {"n_estimators": 100, "min_samples_leaf": 20, "max_features": 0.6, "max_depth": 20} | 59.19 | 38.42 | 61.45 | 0.611 | 35.35 | 55.09 | 0.6574 |
+| Exp4_HistGradientBoosting_all_features | Histogram gradient boosting, lag + moving-average features | 32 | {"min_samples_leaf": 20, "max_iter": 600, "max_depth": 3, "learning_rate": 0.02, "l2_regularization": 0.0} | 58.61 | 38.73 | 61.63 | 0.6087 | 35.71 | 55.38 | 0.6537 |
+| Exp5_HistGradientBoosting_pm25_history_only | Histogram gradient boosting using ONLY PM2.5 history (lags, moving averages) + calendar; no weather variables | 19 | {"min_samples_leaf": 20, "max_iter": 600, "max_depth": 3, "learning_rate": 0.02, "l2_regularization": 0.0} | 61.1 | 40.33 | 63.43 | 0.5855 | 36.95 | 57.13 | 0.6316 |

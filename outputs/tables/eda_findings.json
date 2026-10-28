@@ -1,0 +1,295 @@
+{
+  "rows": 43824,
+  "columns": [
+    "pm25",
+    "dewp",
+    "temp",
+    "pres",
+    "wind_dir",
+    "wind_speed",
+    "snow_hours",
+    "rain_hours"
+  ],
+  "start": "2010-01-01 00:00:00",
+  "end": "2014-12-31 23:00:00",
+  "frequency_counts": {
+    "0 days 01:00:00": 43823
+  },
+  "n_expected_hours": 43824,
+  "missing_per_column": {
+    "pm25": 2067
+  },
+  "pm25_missing_pct": 4.72,
+  "gap_runs": {
+    "n_gaps": 214,
+    "median_len": 1.0,
+    "gaps_le_6h": 158,
+    "gaps_gt_6h": 56,
+    "gaps_gt_24h": 20,
+    "longest_h": 155,
+    "hours_in_gaps_le_6h": 250,
+    "hours_in_gaps_gt_6h": 1817
+  },
+  "missing_by_year": {
+    "2010": 669,
+    "2011": 728,
+    "2012": 489,
+    "2013": 82,
+    "2014": 99
+  },
+  "imputation_simulation": [
+    {
+      "gap_hours": 1,
+      "MAE_linear_interpolation": 8.0,
+      "MAE_forward_fill": 14.2,
+      "MAE_global_mean": 70.1
+    },
+    {
+      "gap_hours": 3,
+      "MAE_linear_interpolation": 13.0,
+      "MAE_forward_fill": 20.3,
+      "MAE_global_mean": 75.8
+    },
+    {
+      "gap_hours": 6,
+      "MAE_linear_interpolation": 17.7,
+      "MAE_forward_fill": 28.3,
+      "MAE_global_mean": 67.0
+    },
+    {
+      "gap_hours": 12,
+      "MAE_linear_interpolation": 25.6,
+      "MAE_forward_fill": 39.3,
+      "MAE_global_mean": 67.3
+    },
+    {
+      "gap_hours": 24,
+      "MAE_linear_interpolation": 36.8,
+      "MAE_forward_fill": 52.3,
+      "MAE_global_mean": 67.5
+    },
+    {
+      "gap_hours": 48,
+      "MAE_linear_interpolation": 47.9,
+      "MAE_forward_fill": 67.0,
+      "MAE_global_mean": 66.4
+    }
+  ],
+  "pm25_missing_after_imputation": 1817,
+  "summary_statistics": {
+    "pm25": {
+      "count": 41757.0,
+      "mean": 98.61,
+      "std": 92.05,
+      "min": 0.0,
+      "25%": 29.0,
+      "50%": 72.0,
+      "75%": 137.0,
+      "max": 994.0,
+      "skew": 1.8,
+      "kurtosis": 4.77
+    },
+    "dewp": {
+      "count": 43824.0,
+      "mean": 1.82,
+      "std": 14.43,
+      "min": -40.0,
+      "25%": -10.0,
+      "50%": 2.0,
+      "75%": 15.0,
+      "max": 28.0,
+      "skew": -0.15,
+      "kurtosis": -1.2
+    },
+    "temp": {
+      "count": 43824.0,
+      "mean": 12.45,
+      "std": 12.2,
+      "min": -19.0,
+      "25%": 2.0,
+      "50%": 14.0,
+      "75%": 23.0,
+      "max": 42.0,
+      "skew": -0.16,
+      "kurtosis": -1.11
+    },
+    "pres": {
+      "count": 43824.0,
+      "mean": 1016.45,
+      "std": 10.27,
+      "min": 991.0,
+      "25%": 1008.0,
+      "50%": 1016.0,
+      "75%": 1025.0,
+      "max": 1046.0,
+      "skew": 0.1,
+      "kurtosis": -0.85
+    },
+    "wind_speed": {
+      "count": 43824.0,
+      "mean": 23.89,
+      "std": 50.01,
+      "min": 0.45,
+      "25%": 1.79,
+      "50%": 5.37,
+      "75%": 21.91,
+      "max": 585.6,
+      "skew": 4.3,
+      "kurtosis": 23.42
+    },
+    "snow_hours": {
+      "count": 43824.0,
+      "mean": 0.05,
+      "std": 0.76,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.0,
+      "75%": 0.0,
+      "max": 27.0,
+      "skew": 19.48,
+      "kurtosis": 449.08
+    },
+    "rain_hours": {
+      "count": 43824.0,
+      "mean": 0.19,
+      "std": 1.42,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.0,
+      "75%": 0.0,
+      "max": 36.0,
+      "skew": 11.66,
+      "kurtosis": 174.42
+    }
+  },
+  "wind_dir_share_pct": {
+    "SE": 34.9,
+    "NW": 32.3,
+    "cv": 21.4,
+    "NE": 11.4
+  },
+  "pm25_extreme": {
+    "above_300": 1759,
+    "above_500": 125,
+    "iqr_upper_fence": 299.0,
+    "pct_above_fence": 4.05
+  },
+  "Q1": {
+    "yearly_mean": {
+      "2010": 104.1,
+      "2011": 99.1,
+      "2012": 90.5,
+      "2013": 101.7,
+      "2014": 97.6
+    },
+    "slope_ug_per_year": -1.18,
+    "p_value": 0.3548589093355572,
+    "r2": 0.0005,
+    "hours_above_150_by_year": {
+      "2010": 1955,
+      "2011": 1809,
+      "2012": 1626,
+      "2013": 1903,
+      "2014": 1743
+    }
+  },
+  "Q2": {
+    "monthly_mean": {
+      "1": 115.2,
+      "2": 126.1,
+      "3": 98.2,
+      "4": 83.6,
+      "5": 80.1,
+      "6": 96.2,
+      "7": 94.1,
+      "8": 80.0,
+      "9": 85.1,
+      "10": 120.3,
+      "11": 105.8,
+      "12": 98.2
+    },
+    "winter_djf_mean": 112.9,
+    "summer_jja_mean": 90.3
+  },
+  "Q3": {
+    "winter_peak_hour": 1,
+    "winter_peak": 143.1,
+    "winter_low_hour": 14,
+    "winter_low": 90.8,
+    "summer_peak_hour": 7,
+    "summer_peak": 98.4,
+    "summer_low_hour": 16,
+    "summer_low": 80.2
+  },
+  "Q4": {
+    "pearson_with_pm25": {
+      "pm25": 1.0,
+      "dewp": 0.17,
+      "temp": -0.09,
+      "pres": -0.05,
+      "wind_speed": -0.25,
+      "snow_hours": 0.02,
+      "rain_hours": -0.05
+    },
+    "spearman_with_pm25": {
+      "pm25": 1.0,
+      "dewp": 0.3,
+      "temp": 0.01,
+      "pres": -0.14,
+      "wind_speed": -0.36,
+      "snow_hours": 0.05,
+      "rain_hours": -0.0
+    },
+    "mean_by_wind_dir": {
+      "NE": 90.1,
+      "NW": 70.1,
+      "SE": 110.8,
+      "cv": 126.1
+    },
+    "median_by_wind_dir": {
+      "NE": 55.0,
+      "NW": 31.0,
+      "SE": 91.0,
+      "cv": 98.0
+    }
+  },
+  "Q5": {
+    "acf_lag1": 0.965,
+    "acf_lag2": 0.919,
+    "acf_lag3": 0.872,
+    "acf_lag6": 0.745,
+    "acf_lag12": 0.563,
+    "acf_lag24": 0.398,
+    "acf_lag48": 0.153,
+    "acf_lag72": 0.073
+  },
+  "Q6": {
+    "corr_next_hour_vs_ma_window": {
+      "1": 0.7449,
+      "3": 0.7202,
+      "6": 0.6885,
+      "12": 0.6439,
+      "24": 0.5845,
+      "48": 0.455,
+      "72": 0.3755,
+      "168": 0.2334
+    }
+  },
+  "Q7": {
+    "corr_wind_lag0": -0.248,
+    "corr_wind_lag6": -0.227,
+    "corr_wind_lag12": -0.198,
+    "corr_wind_lag24": -0.148,
+    "most_negative_lag": 0,
+    "most_negative_value": -0.248,
+    "mean_pm25_by_wind_bin": {
+      "(-0.001, 1.0]": 137.3,
+      "(1.0, 2.0]": 121.4,
+      "(2.0, 5.0]": 106.5,
+      "(5.0, 10.0]": 103.1,
+      "(10.0, 20.0]": 88.6,
+      "(20.0, 50.0]": 76.1,
+      "(50.0, 600.0]": 41.1
+    }
+  }
+}
