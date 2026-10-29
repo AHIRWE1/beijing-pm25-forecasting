@@ -20,9 +20,7 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-# --------------------------------------------------------------------------
 # Constants shared by training and prediction
-# --------------------------------------------------------------------------
 TARGET_COL = "pm25"                       # what we forecast (ug/m3)
 HORIZON = 6                               # forecast 6 hours ahead
 MAX_INTERP_GAP = 6                        # hours; longer gaps are NOT filled
@@ -41,9 +39,8 @@ RAW_COLUMNS = ["pm25", "dewp", "temp", "pres", "wind_dir",
                "wind_speed", "snow_hours", "rain_hours"]
 
 
-# --------------------------------------------------------------------------
 # 1. Loading
-# --------------------------------------------------------------------------
+
 def load_raw(path: str) -> pd.DataFrame:
     """Read the Kaggle/UCI CSV and return a DataFrame indexed by datetime."""
     df = pd.read_csv(path)
@@ -53,9 +50,8 @@ def load_raw(path: str) -> pd.DataFrame:
     return df[RAW_COLUMNS]
 
 
-# --------------------------------------------------------------------------
 # 2. Missing values
-# --------------------------------------------------------------------------
+
 def impute_missing(df: pd.DataFrame, max_gap: int = MAX_INTERP_GAP,
                    fill_remaining: bool = False) -> pd.DataFrame:
     """
@@ -87,9 +83,8 @@ def impute_missing(df: pd.DataFrame, max_gap: int = MAX_INTERP_GAP,
     return out
 
 
-# --------------------------------------------------------------------------
 # 3. Feature engineering
-# --------------------------------------------------------------------------
+
 def build_features(df: pd.DataFrame, with_target: bool = True,
                    dropna: bool = True,
                    target_values: Optional[pd.Series] = None):
@@ -106,27 +101,27 @@ def build_features(df: pd.DataFrame, with_target: bool = True,
     d = df.copy()
     feats = pd.DataFrame(index=d.index)
 
-    # --- current conditions ------------------------------------------------
+    # current conditions 
     for c in ["pm25", "dewp", "temp", "pres", "wind_speed",
               "snow_hours", "rain_hours"]:
         feats[c] = d[c]
 
-    # --- lagged PM2.5 ------------------------------------------------------
+    # lagged PM2.5 
     for k in PM_LAGS:
         feats[f"pm25_lag{k}"] = d["pm25"].shift(k)
 
-    # --- moving averages / rolling statistics of PM2.5 ----------------------
+    # moving averages / rolling statistics of PM2.5 
     for w in PM_MA_WINDOWS:
         feats[f"pm25_ma{w}"] = d["pm25"].rolling(w, min_periods=w).mean()
     feats["pm25_std24"] = d["pm25"].rolling(24, min_periods=24).std()
     feats["pm25_diff1"] = d["pm25"].diff(1)           # last hour's change
 
-    # --- rolling weather context --------------------------------------------
+    # rolling weather context 
     feats["wind_speed_ma6"] = d["wind_speed"].rolling(6, min_periods=6).mean()
     feats["rain_hours_sum24"] = d["rain_hours"].rolling(24, min_periods=24).sum()
     feats["temp_lag24"] = d["temp"].shift(24)
 
-    # --- calendar (cyclical encoding so 23h is close to 0h) -----------------
+    # calendar (cyclical encoding so 23h is close to 0h) 
     hour = d.index.hour
     month = d.index.month
     feats["hour_sin"] = np.sin(2 * np.pi * hour / 24)
@@ -135,7 +130,7 @@ def build_features(df: pd.DataFrame, with_target: bool = True,
     feats["month_cos"] = np.cos(2 * np.pi * (month - 1) / 12)
     feats["is_weekend"] = (d.index.dayofweek >= 5).astype(int)
 
-    # --- wind direction one-hot (fixed categories) ---------------------------
+    # wind direction one-hot (fixed categories) 
     for cat in WIND_CATEGORIES:
         feats[f"wind_{cat}"] = (d["wind_dir"] == cat).astype(int)
 
