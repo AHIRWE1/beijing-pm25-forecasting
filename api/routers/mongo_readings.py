@@ -1,10 +1,11 @@
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from pymongo import ReturnDocument
+from pymongo import ASCENDING, DESCENDING, ReturnDocument
 
 from api.config import get_mongo_collection
-from api.schemas import MongoReadingOut, ReadingIn
+from api.routers.common import DateRange, date_range
+from api.schemas import MongoReadingOut, Page, ReadingIn
 
 router = APIRouter(prefix="/mongo/readings", tags=["mongo"])
 
@@ -42,6 +43,31 @@ def create_reading(reading: ReadingIn, collection=Depends(get_mongo_collection))
     doc = _to_document(reading)
     collection.insert_one(doc)
     return _to_reading(doc)
+
+
+@router.get("/latest", response_model=MongoReadingOut)
+def get_latest_reading(collection=Depends(get_mongo_collection)):
+    doc = collection.find_one(sort=[("timestamp", DESCENDING), ("_id", DESCENDING)])
+    if doc is None:
+        raise HTTPException(status_code=404, detail="No readings found")
+    return _to_reading(doc)
+
+
+@router.get("/range", response_model=Page[MongoReadingOut])
+def get_readings_in_range(params: DateRange = Depends(date_range), collection=Depends(get_mongo_collection)):
+    query = {"timestamp": {"$gte": params.start, "$lte": params.end}}
+    cursor = (
+        collection.find(query)
+        .sort([("timestamp", ASCENDING), ("_id", ASCENDING)])
+        .skip(params.offset)
+        .limit(params.limit)
+    )
+    return Page(
+        total=collection.count_documents(query),
+        limit=params.limit,
+        offset=params.offset,
+        items=[_to_reading(doc) for doc in cursor],
+    )
 
 
 @router.get("/{reading_id}", response_model=MongoReadingOut)

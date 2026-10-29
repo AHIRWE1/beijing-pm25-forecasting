@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from mysql.connector import errors
 
 from api.config import DEFAULT_STATION_ID, get_mysql_connection
-from api.schemas import ReadingIn, SQLReadingOut
+from api.routers.common import DateRange, date_range
+from api.schemas import Page, ReadingIn, SQLReadingOut
 
 router = APIRouter(prefix="/sql/readings", tags=["sql"])
 
@@ -101,6 +102,44 @@ def create_reading(reading: ReadingIn, conn=Depends(get_mysql_connection)):
         conn.rollback()
         raise
     return _fetch_reading(conn, reading_id)
+
+
+@router.get("/latest", response_model=SQLReadingOut)
+def get_latest_reading(conn=Depends(get_mysql_connection)):
+    with conn.cursor(dictionary=True) as cur:
+        cur.execute(SELECT_READING + " ORDER BY wr.reading_ts DESC, wr.reading_id DESC LIMIT 1")
+        row = cur.fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="No readings found")
+    return _row_to_reading(row)
+
+
+@router.get("/range", response_model=Page[SQLReadingOut])
+def get_readings_in_range(params: DateRange = Depends(date_range), conn=Depends(get_mysql_connection)):
+    with conn.cursor(dictionary=True) as cur:
+        cur.execute(
+            """
+            SELECT COUNT(*) AS total
+            FROM weather_readings wr
+            JOIN pm25_measurements pm ON pm.reading_id = wr.reading_id
+            WHERE wr.reading_ts BETWEEN %s AND %s
+            """,
+            (params.start, params.end),
+        )
+        total = cur.fetchone()["total"]
+        cur.execute(
+            SELECT_READING
+            + " WHERE wr.reading_ts BETWEEN %s AND %s"
+            + " ORDER BY wr.reading_ts, wr.reading_id LIMIT %s OFFSET %s",
+            (params.start, params.end, params.limit, params.offset),
+        )
+        rows = cur.fetchall()
+    return Page(
+        total=total,
+        limit=params.limit,
+        offset=params.offset,
+        items=[_row_to_reading(row) for row in rows],
+    )
 
 
 @router.get("/{reading_id}", response_model=SQLReadingOut)

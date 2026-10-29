@@ -1,7 +1,15 @@
 from datetime import datetime, timezone
-from typing import Literal, Optional
+from typing import Generic, Literal, Optional, TypeVar
 
 from pydantic import BaseModel, Field, field_validator
+
+T = TypeVar("T")
+
+
+def to_naive_utc(value: datetime) -> datetime:
+    if value.tzinfo is not None:
+        value = value.astimezone(timezone.utc).replace(tzinfo=None)
+    return value
 
 
 class Weather(BaseModel):
@@ -25,11 +33,9 @@ class ReadingIn(BaseModel):
 
     @field_validator("timestamp")
     @classmethod
-    def to_naive_utc(cls, value: datetime) -> datetime:
+    def to_hour(cls, value: datetime) -> datetime:
         # Hourly data: aware input is converted to UTC, then stored naive and truncated to the hour
-        if value.tzinfo is not None:
-            value = value.astimezone(timezone.utc).replace(tzinfo=None)
-        return value.replace(minute=0, second=0, microsecond=0)
+        return to_naive_utc(value).replace(minute=0, second=0, microsecond=0)
 
 
 class ReadingOut(ReadingIn):
@@ -48,3 +54,10 @@ class SQLReadingOut(ReadingOut):
 class MongoReadingOut(ReadingOut):
     id: str
     station: str
+
+
+class Page(BaseModel, Generic[T]):
+    total: int
+    limit: int
+    offset: int
+    items: list[T]
