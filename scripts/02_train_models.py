@@ -60,9 +60,9 @@ def metrics(y_true, y_pred):
             "R2": r2_score(y_true, y_pred)}
 
 
-# ---------------------------------------------------------------------------
+
 # Data
-# ---------------------------------------------------------------------------
+
 observations = load_raw(RAW).asfreq("h")
 feature_data = observations.copy()
 feature_data["pm25"] = observations["pm25"].ffill(limit=MAX_INTERP_GAP)
@@ -82,9 +82,9 @@ CALENDAR = ["hour_sin", "hour_cos", "month_sin", "month_cos", "is_weekend"]
 PM_HISTORY_ONLY = [c for c in ALL if c.startswith("pm25")] + CALENDAR  # no weather
 cv = TimeSeriesSplit(n_splits=4, gap=HORIZON)
 
-# ---------------------------------------------------------------------------
+
 # Experiment definitions
-# ---------------------------------------------------------------------------
+
 EXPERIMENTS = [
     dict(name="Exp1_Ridge_all_features",
          description="Ridge regression, lag + moving-average features",
@@ -143,7 +143,7 @@ EXPERIMENTS = [
 
 rows = []
 
-# --- baseline: persistence ("future = now") ------------------------
+# baseline: persistence ("future = now") 
 base_val = metrics(yva, Xva["pm25"])
 base_test = metrics(yte, Xte["pm25"])
 rows.append({"experiment": "Exp0_Persistence_baseline",
@@ -195,9 +195,9 @@ with open("outputs/tables/experiment_table.md", "w", encoding="utf-8") as f:
     f.write("\n".join(markdown_rows) + "\n")
 print(table.drop(columns=["best_hyperparameters", "model"]).to_string(index=False))
 
-# ---------------------------------------------------------------------------
+
 # Select winner on VALIDATION RMSE (test set is not used for selection)
-# ---------------------------------------------------------------------------
+
 cands = table[table.experiment.isin(fitted.keys())]
 winner_name = cands.sort_values("val_RMSE").iloc[0]["experiment"]
 exp, search = fitted[winner_name]
@@ -224,9 +224,9 @@ meta = {"model_name": winner_name, "horizon_hours": HORIZON,
 with open("models/model_metadata.json", "w") as f:
     json.dump(meta, f, indent=2)
 
-# ---------------------------------------------------------------------------
+
 # Figures
-# ---------------------------------------------------------------------------
+
 # M1: experiment comparison (test RMSE, lower is better)
 fig, ax = plt.subplots(figsize=(8, 3.6))
 labels = [r.replace("Exp", "E").replace("_all_features", "").replace("_baseline", "")
