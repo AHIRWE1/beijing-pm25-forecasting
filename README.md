@@ -58,14 +58,14 @@ from top to bottom.
 
 ## Outputs
 
-- `outputs/figures/` — EDA, analytical-question, and model-evaluation figures.
-- `outputs/tables/` — EDA summaries, experiment comparisons, tuning results,
+- `outputs/figures/` - EDA, analytical-question, and model-evaluation figures.
+- `outputs/tables/` - EDA summaries, experiment comparisons, tuning results,
   feature importance, and error breakdowns.
-- `data/processed/pm25_clean.csv` — regenerated EDA-cleaned hourly series.
-- `models/pm25_model.joblib` — final fitted forecasting model.
-- `models/model_metadata.json` — model features, forecast horizon, parameters,
+- `data/processed/pm25_clean.csv` - regenerated EDA-cleaned hourly series.
+- `models/pm25_model.joblib` - final fitted forecasting model.
+- `models/model_metadata.json` - model features, forecast horizon, parameters,
   and test metrics.
-- `report/task1_findings.md` — written summary of Task 1 results.
+- `report/task1_findings.md` - written summary of Task 1 results.
 
 The raw and processed CSV files are excluded by `.gitignore`; scripts regenerate
 the processed series from the locally supplied raw dataset.
