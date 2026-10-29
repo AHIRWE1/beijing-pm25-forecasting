@@ -1,5 +1,5 @@
 """
-Task 1 (A + B): Exploratory data analysis and analytical questions.
+Task 1: Exploratory data analysis and analytical questions.
 
 Run from the project root:
     python scripts/01_eda.py
@@ -32,7 +32,7 @@ os.makedirs(FIG, exist_ok=True)
 os.makedirs(TAB, exist_ok=True)
 os.makedirs("data/processed", exist_ok=True)
 
-# ---- restrained plotting style: thin marks, recessive grid, one accent ----
+# restrained plotting style: thin marks, recessive grid, one accent 
 BLUE, ORANGE, GREY, INK = "#2a6fb0", "#d9822b", "#9aa3ad", "#1f2937"
 plt.rcParams.update({
     "figure.dpi": 130, "axes.spines.top": False, "axes.spines.right": False,
@@ -51,9 +51,9 @@ def save(fig, name):
 
 F = {}  # findings dictionary, dumped to JSON at the end
 
-# ===========================================================================
+
 # PART A - understanding the dataset
-# ===========================================================================
+
 raw = load_raw(RAW)
 F["rows"] = int(len(raw))
 F["columns"] = list(raw.columns)
@@ -62,7 +62,7 @@ steps = raw.index.to_series().diff().dropna().value_counts()
 F["frequency_counts"] = {str(k): int(v) for k, v in steps.items()}
 F["n_expected_hours"] = int((raw.index.max() - raw.index.min()) / pd.Timedelta("1h") + 1)
 
-# --- missing values --------------------------------------------------------
+# missing values 
 miss = raw.isna().sum()
 F["missing_per_column"] = {k: int(v) for k, v in miss.items() if v}
 F["pm25_missing_pct"] = round(100 * raw["pm25"].isna().mean(), 2)
@@ -97,7 +97,7 @@ ax[1].set_xlabel("consecutive missing hours")
 ax[1].set_ylabel("number of stretches")
 save(fig, "A1_missing_values")
 
-# --- justify the interpolation limit by simulation ---------------------------
+# justify the interpolation limit by simulation 
 rng = np.random.default_rng(42)
 known = raw["pm25"].copy()
 sim_rows = []
@@ -135,12 +135,12 @@ ax.set_title("Which fill method recovers hidden values best?")
 ax.legend(frameon=False)
 save(fig, "A2_imputation_simulation")
 
-# --- impute and persist the clean series ------------------------------------
+# impute and persist the clean series 
 clean = impute_missing(raw)
 clean.to_csv("data/processed/pm25_clean.csv", index_label="datetime")
 F["pm25_missing_after_imputation"] = int(clean["pm25"].isna().sum())
 
-# --- summary statistics ----------------------------------------------------
+# summary statistics 
 num_cols = ["pm25", "dewp", "temp", "pres", "wind_speed", "snow_hours",
             "rain_hours"]
 desc = raw[num_cols].describe().T
@@ -150,7 +150,7 @@ desc.round(2).to_csv(f"{TAB}/summary_statistics.csv")
 F["summary_statistics"] = desc.round(2).to_dict(orient="index")
 F["wind_dir_share_pct"] = (raw["wind_dir"].value_counts(normalize=True) * 100).round(1).to_dict()
 
-# --- distributions -----------------------------------------------------------
+# distributions 
 fig, axes = plt.subplots(2, 4, figsize=(12, 5.2))
 for ax, c in zip(axes.ravel(), num_cols):
     ax.hist(raw[c].dropna(), bins=50, color=BLUE, edgecolor="white", lw=0.3)
@@ -179,13 +179,13 @@ F["pm25_extreme"] = {
     "pct_above_fence": round(100 * (raw["pm25"] > raw["pm25"].quantile(.75) +
                              1.5 * (raw["pm25"].quantile(.75) - raw["pm25"].quantile(.25))).mean(), 2)}
 
-# ===========================================================================
+
 # PART B - analytical questions (all use the imputed series)
-# ===========================================================================
+
 d = clean.copy()
 d["year"], d["month"], d["hour"] = d.index.year, d.index.month, d.index.hour
 
-# ---- Q1 trend ---------------------------------------------------------------
+# Q1 trend 
 daily = d["pm25"].resample("D").mean()
 ma30 = daily.rolling(30, min_periods=20, center=True).mean()
 ma365 = daily.rolling(365, min_periods=300, center=True).mean()
@@ -205,7 +205,7 @@ ax.set_title("Q1  Is there a long-term trend in PM2.5?")
 ax.legend(frameon=False, ncol=3, loc="upper right")
 save(fig, "Q1_trend")
 
-# ---- Q2 seasonality -----------------------------------------------------------
+# Q2 seasonality 
 monthly = d.groupby("month")["pm25"].mean().round(1)
 F["Q2"] = {"monthly_mean": monthly.to_dict(),
            "winter_djf_mean": round(d[d.month.isin([12, 1, 2])].pm25.mean(), 1),
@@ -219,7 +219,7 @@ ax.set_ylabel("mean PM2.5 (ug/m3)")
 ax.set_title("Q2  Is there a seasonal pattern?")
 save(fig, "Q2_seasonality")
 
-# ---- Q3 daily cycle --------------------------------------------------------------
+# Q3 daily cycle 
 winter = d[d.month.isin([12, 1, 2])].groupby("hour")["pm25"].mean()
 summer = d[d.month.isin([6, 7, 8])].groupby("hour")["pm25"].mean()
 F["Q3"] = {"winter_peak_hour": int(winter.idxmax()), "winter_peak": round(winter.max(), 1),
@@ -236,7 +236,7 @@ ax.set_title("Q3  What does a typical day look like?")
 ax.legend(frameon=False)
 save(fig, "Q3_daily_cycle")
 
-# ---- Q4 weather correlation --------------------------------------------------------
+# Q4 weather correlation 
 wc = d[["pm25", "dewp", "temp", "pres", "wind_speed", "snow_hours", "rain_hours"]].copy()
 pear = wc.corr()
 spear = wc.corr(method="spearman")["pm25"].round(2)
@@ -265,7 +265,7 @@ ax[1].set_xlabel("wind direction (cv = calm / variable)")
 ax[1].set_title("PM2.5 by wind direction (outliers hidden)")
 save(fig, "Q4_weather_correlation")
 
-# ---- Q5 lag effects (LAGGED FEATURES) -------------------------------------------------
+# Q5 lag effects (LAGGED FEATURES) 
 s = d["pm25"]
 acf_vals = [s.autocorr(lag=k) for k in range(1, 73)]
 F["Q5"] = {"acf_lag1": round(acf_vals[0], 3), "acf_lag2": round(acf_vals[1], 3),
@@ -291,7 +291,7 @@ for a, k, col in ((ax[1], 1, BLUE), (ax[2], 24, ORANGE)):
     a.set_title(f"lag {k}:  r = {s.autocorr(k):.2f}")
 save(fig, "Q5_lag_effects")
 
-# ---- Q6 moving averages (MOVING AVERAGES) ------------------------------------------------
+# Q6 moving averages 
 target_next = s.shift(-HORIZON)
 windows = [1, 3, 6, 12, 24, 48, 72, 168]
 corr_ma = {}
@@ -319,7 +319,7 @@ ax[1].set_ylabel(f"correlation with PM2.5 {HORIZON} h ahead")
 ax[1].set_title("Which window predicts best?")
 save(fig, "Q6_moving_averages")
 
-# ---- Q7 delayed effect of wind (LAGGED external variable) -----------------------------------
+# Q7 delayed effect of wind (LAGGED external variable) 
 cross = {k: round(d["wind_speed"].shift(k).corr(d["pm25"]), 3) for k in range(0, 49)}
 cross_log = {k: round(np.log1p(d["wind_speed"]).shift(k).corr(np.log1p(d["pm25"])), 3)
              for k in range(0, 49)}
