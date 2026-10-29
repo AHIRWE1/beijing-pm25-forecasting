@@ -43,3 +43,8 @@ class SQLReadingOut(ReadingOut):
     id: int
     measurement_id: int
     station_id: int
+
+
+class MongoReadingOut(ReadingOut):
+    id: str
+    station: str
