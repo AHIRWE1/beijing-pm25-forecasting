@@ -284,3 +284,19 @@ features can't be computed. The script then stops, names the missing features
 and asks for a different `--at`. It also exits with a message if the API can't
 be reached. The model was saved with scikit-learn 1.9.1, so use that version, or
 retrain with `scripts/02_train_models.py`, to avoid version warnings.
+
+### Checking the forecast against training
+
+`scripts/check_predict.py` checks that serving matches training. It samples
+forecast origins from the CSV, half of them in the first hour after a PM2.5
+gap. For each origin, it compares the training pipeline's prediction from the
+raw CSV with the prediction `predict.py` makes from the API:
+
+```sh
+python scripts/check_predict.py                  # 10 origins, both databases
+python scripts/check_predict.py --n 20 --db sql
+```
+
+It prints one line per origin and database, ends with the number of matches,
+and exits with code 1 if any prediction differs. With the full dataset loaded,
+all 20 default checks match on both databases.
