@@ -260,18 +260,24 @@ python scripts/predict.py --json                       # machine-readable output
 | `--model`, `--metadata` | `models/pm25_model.joblib`, `models/model_metadata.json` | Model files |
 | `--json` | off | Print the result as JSON |
 
-Example output (format only; the values depend on the data loaded):
+Example output with the full dataset loaded, for a past origin
+(`--at 2014-06-15T12:00:00`). `--db sql` gives the same result:
 
 ```text
 Database:          mongo
 Model:             Exp3_RandomForest_all_features
 Records fetched:   96 (0 of 96 hours absent, 0 PM2.5 gaps, 0 left unfilled)
-Forecast origin:   2014-12-31T23:00:00
-  PM2.5 now:       73.9 ug/m3
-  24 h average:    46.9 ug/m3
-Forecast for:      2015-01-01T05:00:00 (+6 h)
-  Predicted PM2.5: 94.1 ug/m3
+Forecast origin:   2014-06-15T12:00:00
+  PM2.5 now:       89.0 ug/m3
+  24 h average:    95.2 ug/m3
+Forecast for:      2014-06-15T18:00:00 (+6 h)
+  Predicted PM2.5: 93.0 ug/m3
+  Actual PM2.5:    100.0 ug/m3 (error -7.0)
 ```
+
+Without `--at`, the origin is the last reading in the dataset
+(2014-12-31 23:00), and the script forecasts 13.5 ug/m3 for 2015-01-01 05:00.
+No actual value is printed because the dataset ends before that hour.
 
 If the 72 hours before the origin contain a gap longer than 6 hours, the model's
 features can't be computed. The script then stops, names the missing features

@@ -1,28 +1,4 @@
-"""
-Task 4: Forecast PM2.5 six hours ahead from records served by the API.
 
-Run from the project root while the API is running (see README):
-    python scripts/predict.py                      # latest reading, MongoDB
-    python scripts/predict.py --db sql             # latest reading, MySQL
-    python scripts/predict.py --at 2014-06-15T12:00:00
-
-Pipeline
-  1. Fetch    GET /{db}/readings/latest gives the forecast origin (unless
-              --at is given), then GET /{db}/readings/range returns the
-              hours of history the features need.
-  2. Prepare  Flatten the API JSON into the column names used in Task 1, put
-              it on a regular hourly index, and fill short PM2.5 gaps exactly
-              as in training (causal forward fill, at most MAX_INTERP_GAP
-              hours). Lags, moving averages and calendar features come from
-              src.preprocessing.build_features, the function used in training.
-  3. Load     models/pm25_model.joblib and models/model_metadata.json.
-  4. Predict  PM2.5 at origin + HORIZON hours. If the API already holds the
-              reading for that hour (historical data), it is shown for
-              comparison.
-
-Only the Python standard library is used for HTTP, so no extra dependency is
-needed beyond requirements.txt.
-"""
 import argparse
 import json
 import os
@@ -217,8 +193,8 @@ def print_summary(r: dict):
 
 
 def parse_args():
-    p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                formatter_class=argparse.RawDescriptionHelpFormatter)
+    p = argparse.ArgumentParser(
+        description="Forecast PM2.5 6 hours ahead from readings served by the API.")
     p.add_argument("--api-url", default=os.getenv("API_URL", DEFAULT_API_URL),
                    help=f"base URL of the API (default {DEFAULT_API_URL})")
     p.add_argument("--db", choices=["mongo", "sql"], default="mongo",
