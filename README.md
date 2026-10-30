@@ -220,3 +220,83 @@ curl -X POST http://127.0.0.1:8000/mongo/readings -H "Content-Type: application/
 
 In Windows PowerShell, type `curl.exe` instead of `curl`. The `POST` example is
 easiest to run from Git Bash or from the `/docs` page.
+
+## Forecast script (Task 4)
+
+`scripts/predict.py` connects the earlier tasks. It fetches readings from the
+API, preprocesses them the same way as in training, loads the trained model and
+forecasts PM2.5 six hours ahead.
+
+1. **Fetch.** `GET /{db}/readings/latest` sets the forecast origin. Then
+   `GET /{db}/readings/range` returns the 96 hours up to and including the
+   origin, following pagination. The features need 72 hours of history, and
+   the extra 24 hours let gaps at the start of the window be filled.
+2. **Preprocess.** The script converts the API JSON to the Task 1 column names
+   and builds a regular hourly index. Like `scripts/02_train_models.py`, it
+   forward-fills PM2.5 for at most 6 hours, using only past values. Absent
+   hours of weather are filled the same way. It then calls
+   `src.preprocessing.build_features`, the same function used in training, to
+   create the lag, moving-average, calendar and wind-direction features.
+3. **Load.** It loads `models/pm25_model.joblib` and checks that the horizon in
+   `models/model_metadata.json` matches the preprocessing code.
+4. **Predict.** It forecasts PM2.5 at origin + 6 h. If the API already has the
+   reading for that hour, the script also prints the actual value and the
+   error.
+
+Start the API (see above), then from the repository root:
+
+```sh
+python scripts/predict.py                              # latest MongoDB reading
+python scripts/predict.py --db sql                     # latest MySQL reading
+python scripts/predict.py --at 2014-06-15T12:00:00     # a past origin, compared with the actual value
+python scripts/predict.py --json                       # machine-readable output
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `--db` | `mongo` | Read from the `mongo` or `sql` endpoints |
+| `--at` | latest reading | Forecast origin, ISO 8601 |
+| `--api-url` | `http://127.0.0.1:8000`, or the `API_URL` environment variable | Base URL of the API |
+| `--model`, `--metadata` | `models/pm25_model.joblib`, `models/model_metadata.json` | Model files |
+| `--json` | off | Print the result as JSON |
+
+Example output with the full dataset loaded, for a past origin
+(`--at 2014-06-15T12:00:00`). `--db sql` gives the same result:
+
+```text
+Database:          mongo
+Model:             Exp3_RandomForest_all_features
+Records fetched:   96 (0 of 96 hours absent, 0 PM2.5 gaps, 0 left unfilled)
+Forecast origin:   2014-06-15T12:00:00
+  PM2.5 now:       89.0 ug/m3
+  24 h average:    95.2 ug/m3
+Forecast for:      2014-06-15T18:00:00 (+6 h)
+  Predicted PM2.5: 93.0 ug/m3
+  Actual PM2.5:    100.0 ug/m3 (error -7.0)
+```
+
+Without `--at`, the origin is the last reading in the dataset
+(2014-12-31 23:00), and the script forecasts 13.5 ug/m3 for 2015-01-01 05:00.
+No actual value is printed because the dataset ends before that hour.
+
+If the 72 hours before the origin contain a gap longer than 6 hours, the model's
+features can't be computed. The script then stops, names the missing features
+and asks for a different `--at`. It also exits with a message if the API can't
+be reached. The model was saved with scikit-learn 1.9.1, so use that version, or
+retrain with `scripts/02_train_models.py`, to avoid version warnings.
+
+### Checking the forecast against training
+
+`scripts/check_predict.py` checks that serving matches training. It samples
+forecast origins from the CSV, half of them in the first hour after a PM2.5
+gap. For each origin, it compares the training pipeline's prediction from the
+raw CSV with the prediction `predict.py` makes from the API:
+
+```sh
+python scripts/check_predict.py                  # 10 origins, both databases
+python scripts/check_predict.py --n 20 --db sql
+```
+
+It prints one line per origin and database, ends with the number of matches,
+and exits with code 1 if any prediction differs. With the full dataset loaded,
+all 20 default checks match on both databases.
